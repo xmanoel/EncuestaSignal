@@ -197,11 +197,39 @@ p5
 funciones.usadas %>%   
   gather() %>% 
   filter(value == 1) %>% 
-  ggplot(aes(key, ..count..)) + 
+  group_by(key) %>%
+  summarize(n=n()) %>%
+  ggplot(aes(x=key,y=n,fill=rep(c("claro","oscuro"),12))) + 
   theme_light() +
   labs(y="Numero Respuestas",x="Funciones usadas",
        title="Uso de las funciones de Signal")+
-  scale_colour_brewer(palette = "PuBuGn")+
-  geom_bar()+
+  geom_col()+
+  scale_fill_manual(values=c( "#D22020", "#4D4D4D"))+
   theme(legend.position = "none")+
   coord_flip()
+
+
+# Repetir o usar Signal en otras asignaturas
+Signal20_21 %>%
+  dplyr::select(Utilizar.Signal.En.Otras.Asignaturas) %>%
+  group_by(Utilizar.Signal.En.Otras.Asignaturas) %>%
+  count() %>%
+  ungroup() %>%
+  mutate(Respuesta = factor(Utilizar.Signal.En.Otras.Asignaturas,
+                            levels=c("Sí","No")),
+         cumulative = cumsum(n),
+         midpoint = cumulative - n / 2,
+         labels = paste0(round((n/ sum(n)) * 100, 1), "%")) %>%
+ggplot(aes(x="",y=n,
+           fill=Respuesta)) + 
+  theme_light() +
+  labs(y="",x="",fill="Respuesta:",
+       title="¿Te gustaría utilizar Signal en otras asignaturas y/o actividades académicas?")+
+  geom_bar(width = 1, stat = "identity")+
+  scale_fill_manual(values=c( "#D22020","#797979" ))+
+  theme(axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        panel.grid  = element_blank())+
+  geom_text(aes(x=1.2, y = midpoint, 
+                label = labels),color="black",fontface="bold")+
+  coord_polar(theta="y", start=0) 
