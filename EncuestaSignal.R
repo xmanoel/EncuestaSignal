@@ -150,17 +150,29 @@ p2
 datos3 <- Signal20_21 %>% gather(key = Benefits, value = Value, Comparacion.fácil.de.usar:Comparacion.trato.cercano..docente)
 datos3$Value<-factor(datos3$Value,
                      levels=c("Nada de acuerdo","Algo de acuerdo","Bastante de acuerdo","Muy de acuerdo"))
+etiquetas.x <- c(
+  "más fácil de usar",
+  "más motivante",
+  "más amigable",
+  "más cómodo",
+  "más útil",
+  "permite estar mejor informado/a",
+  "permite organizarme mejor",
+  "permite seguir mejor las novedades",
+  "permite compartir dudas con el aula",
+  "un trato más cercano con el/la docente"
+)
 
-# Resumen de género por contexto
-p3 = ggplot(datos3, aes(x=Benefits,fill=Value)) + 
+# Valor comparativa con Studium y Email 
+ggplot(datos3, aes(x=Benefits,fill=Value)) + 
   theme_light() +
-  labs(y="Valoracion",x="Contexto de Uso",
-       title="Comparacion Signal con otras herramientas")+
-  scale_x_discrete(labels = function(x) str_wrap(x, width = 4))+
-  scale_fill_manual(values=c("#4D4D4D", "#385E9D", "#FFC845","#D22020"))+
+  labs(y="Porcentaje Respuestas",x="",
+       title="Comparacion Signal con Studium y Email",
+       fill="Respuesta")+
+  scale_x_discrete(labels = etiquetas.x)+
+  scale_fill_manual(values=c("#385E9D", "#91acd7", "#ed8a8a","#D22020"))+
   geom_bar()+
   coord_flip()
-p3
 
 names(Signal20_21)
 
@@ -186,14 +198,16 @@ p5 = ggplot(Signal20_21,aes(x=N.Funciones.Usadas,
                             color=Satisfacion.General.Signal)) + 
   theme_light() +
   labs(y="Satisfacción General con Signal",x="Numero de Funciones Usadas",
-       title="Comparamos Conocimiento Funcionalidades de Signal con la Valoracion de la Aplicacion")+
+       title="Comparamos Conocimiento Funcionalidades de Signal con la Valoracion de la Aplicacion",
+       fill="Satisfaccion Signal",
+       size="Total Opiniones")+
   scale_color_gradient(low="#FFC845",high="#D22020")+
   geom_count()+
   scale_size_area(max_size=12)
 p5
 
 
-# Resumen de género por contexto
+# Funciones de Signal segun uso (barras)
 funciones.usadas %>%   
   gather() %>% 
   filter(value == 1) %>% 

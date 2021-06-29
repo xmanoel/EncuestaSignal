@@ -78,6 +78,129 @@ Signal20_21$N.Funciones.Usadas <- as.numeric(lapply(funciones,length))
 
 ```
 
+# Comparación de Signal con Email y Studium 
+
+Los alumnos compararon Signal con las otras herramientas que se utilizan en la universidad (Email y Studium) y opinaron sobre sus ventajas e inconvenientes.
+
+```{r fig.height=4, fig.width=8}
+datos3 <- Signal20_21 %>% gather(key = Benefits, value = Value, Comparacion.fácil.de.usar:Comparacion.trato.cercano..docente)
+datos3$Value<-factor(datos3$Value,
+                     levels=c("Nada de acuerdo","Algo de acuerdo","Bastante de acuerdo","Muy de acuerdo"))
+etiquetas.x <- c(
+  "más fácil de usar",
+  "más motivante",
+  "más amigable",
+  "más cómodo",
+  "más útil",
+  "permite estar mejor informado/a",
+  "permite organizarme mejor",
+  "permite seguir mejor las novedades",
+  "permite compartir dudas con el aula",
+  "un trato más cercano con el/la docente"
+)
+
+# Valor comparativa con Studium y Email 
+ggplot(datos3, aes(x=Benefits,fill=Value)) + 
+  theme_light() +
+  labs(y="Porcentaje Respuestas",x="",
+       title="Comparacion Signal con Studium y Email",
+       fill="Respuesta")+
+  scale_x_discrete(labels = etiquetas.x)+
+  scale_fill_manual(values=c("#385E9D", "#91acd7", "#ed8a8a","#D22020"))+
+  geom_bar()+
+  coord_flip()
+```
+
+
+
+# Alumnos que desean usar Signal en otras asignaturas
+
+En la encuesta se preguntó a los alumnos si estarían dispuestos a utilizar Signal en otras asignaturas
+
+```{r fig.height=3, fig.width=7}
+# Repetir o usar Signal en otras asignaturas
+Signal20_21 %>%
+  dplyr::select(Utilizar.Signal.En.Otras.Asignaturas) %>%
+  group_by(Utilizar.Signal.En.Otras.Asignaturas) %>%
+  count() %>%
+  ungroup() %>%
+  mutate(Respuesta = factor(Utilizar.Signal.En.Otras.Asignaturas,
+                            levels=c("Sí","No")),
+         cumulative = cumsum(n),
+         midpoint = cumulative - n / 2,
+         labels = paste0(round((n/ sum(n)) * 100, 1), "%")) %>%
+ggplot(aes(x="",y=n,
+           fill=Respuesta)) + 
+  theme_light() +
+  labs(y="",x="",fill="Respuesta:",
+       title="¿Te gustaría utilizar Signal en otras asignaturas?")+
+  geom_bar(width = 1, stat = "identity")+
+  scale_fill_manual(values=c( "#D22020","#797979" ))+
+  theme(axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        panel.grid  = element_blank())+
+  geom_text(aes(x=1.2, y = midpoint, 
+                label = labels),color="black",fontface="bold")+
+  coord_polar(theta="y", start=0) 
+```
+
+
+
+# Uso de las funciones de Signal por los alumnos 
+
+Se muestra que funcionalidades de Signal han sido las más utilizadas por los alumnos este curso. 
+
+```{r}
+funciones.usadas <- data.frame()
+fila=0
+# recorremos la lista de funciones mencionada por cada alumno
+for (por.persona in funciones)
+{
+  fila=fila+1
+  # añadimos una columna por función 
+  for(funcion in por.persona)
+  {
+    funciones.usadas[fila,funcion]<-1
+  }
+}
+
+
+funciones.usadas %>%   
+  gather() %>% 
+  filter(value == 1) %>% 
+  group_by(key) %>% summarize(n=n()) %>%
+  kable
+```
+
+
+
+
+
+```{r}
+# Funciones de Signal segun uso (barras)
+funciones.usadas %>%   
+  gather() %>% 
+  filter(value == 1) %>% 
+  group_by(key) %>%
+  summarize(n=n()) %>%
+  ggplot(aes(x=key,y=n,fill=rep(c("claro","oscuro"),12))) + 
+  theme_light() +
+  labs(y="Numero Respuestas",x="Funciones usadas",
+       title="Uso de las funciones de Signal")+
+  geom_col()+
+  scale_fill_manual(values=c( "#D22020", "#4D4D4D"))+
+  theme(legend.position = "none")+
+  coord_flip()
+
+```
+
+
+
+
+
+
+
+
 # Relacion entre el conocimiento de las funcionalidades y la valoración de Signal 
 
 Comparamos las funcionalidades de Signal que conoce el participante en la encuesta con la valoración que ha hecho del uso de Signal en este curso.
@@ -113,7 +236,7 @@ p5 = ggplot(Signal20_21,aes(x=N.Funciones.Usadas,
 p5
 ```
 
-El grosor del punto indica que más de una persona ha respondido ese número de funciones y esa valoracion. Por tanto cuantos más puntos y mayor grosor indica que más participantes han elegido esta statisfacción y este conocimiento de las funcionalidades de Signal. 
+El grosor del punto indica que más de un alumno/a ha respondido ese número de funciones y esa valoración. Por tanto cuantos más puntos y mayor grosor indica que más participantes han elegido esta satisfacción y este conocimiento de las funcionalidades de Signal. 
 
 
 
@@ -160,57 +283,8 @@ lnewdat <-  melt(pred.sat, id.vars = c("N.Funciones.Usadas"),
                  variable.name = "Level", value.name="Probability")
 ggplot(lnewdat, aes(x = N.Funciones.Usadas, y = Probability, colour = Level)) +
    labs(x="Numero de Funciones Usadas",
-       title="Nivel de satisfacción de una persona conforme conoce más funciones de Signal")+
+       title="Nivel de satisfacción alumno / Conocimiento de herramienta")+
   scale_colour_discrete(name="Satisfaccion",labels=c("Nada","Poco","Satisfecho","Mucho"))+
   geom_line()
 
 ```
-
-# Recuento de funciones 
-
-
-```{r}
-funciones.usadas <- data.frame()
-fila=0
-# recorremos la lista de funciones mencionada por cada persona
-for (por.persona in funciones)
-{
-  fila=fila+1
-  # añadimos una columna por función 
-  for(funcion in por.persona)
-  {
-    funciones.usadas[fila,funcion]<-1
-  }
-}
-
-
-funciones.usadas %>%   
-  gather() %>% 
-  filter(value == 1) %>% 
-  group_by(key) %>% summarize(n=n()) %>%
-  kable
-```
-
-
-
-
-
-```{r}
-# Resumen de género por contexto
-funciones.usadas %>%   
-  gather() %>% 
-  filter(value == 1) %>% 
-  ggplot(aes(key, ..count..)) + 
-  theme_light() +
-  labs(y="Numero Respuestas",x="Funciones usadas",
-       title="Uso de las funciones de Signal")+
-  scale_colour_brewer(palette = "PuBuGn")+
-  geom_bar()+
-  theme(legend.position = "none")+
-  coord_flip()
-
-```
-
-
-
-
